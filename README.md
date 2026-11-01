@@ -64,7 +64,6 @@ button:hover:not(:disabled),.btn:hover{background:var(--ink);color:#fff}button:d
 <div id="con"><div style="display:flex;justify-content:space-between;padding:6px 12px;border-bottom:1px solid #26405c;font:12px var(--m)"><span>JOURNAL TECHNIQUE</span><button class="sm" data-a="con" style="color:#bfe3ff;border-color:#4a6a8a">✕</button></div><div id="lb"></div></div>
 <div id="md"><div id="mdc"></div></div><div id="toast"></div>
 <div id="pl"><video id="pv" playsinline style="display:none"></video><img id="pi" alt="" style="display:none"><div id="sub"></div><button data-a="stopplay">✕ Quitter</button></div>
-
 <script>
 /* ═════════════════════════════════════════════════════════════════════
    CONFIG
@@ -149,9 +148,6 @@ async function dbPut(s,v){const k=v.key||v.id;mem[s][k]=v;if(db&&mode=='idb'){tr
 async function dbDel(s,k){delete mem[s][k];if(db&&mode=='idb'){try{return await tx(s,'readwrite',o=>o.delete(k))}catch(e){fall(e)}}try{localStorage.removeItem(lsK(s,k))}catch(e){}}
 async function dbAll(s){if(db&&mode=='idb'){try{return await tx(s,'readonly',o=>o.getAll())}catch(e){fall(e)}}const o=Object.assign({},mem[s]);try{for(let i=0;i<localStorage.length;i++){const n=localStorage.key(i);if(n.startsWith(lsK(s,''))){const v=JSON.parse(localStorage.getItem(n));o[v.key||v.id]=v}}}catch(e){}return Object.values(o)}
 
-/* ═════════════════════════════════════════════════════════════════════
-   PATCH 1 : save() synchronise Q → P.q
-   ═════════════════════════════════════════════════════════════════════ */
 let svT;
 function save(){
   if(!P)return;
@@ -193,9 +189,6 @@ async function slot(kind){
   }
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   PATCH 2 : call() — le 429 ne consomme pas de tentative
-   ═════════════════════════════════════════════════════════════════════ */
 async function call(kind,url,body,tries){
   let err;
   let attempts=0;
@@ -355,7 +348,7 @@ function readFile(f,maxSide){
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   MODÈLE DE PROJET  ✅ CORRIGÉ : nsc:5,
+   MODÈLE DE PROJET
    ═════════════════════════════════════════════════════════════════════ */
 const newP=()=>({
   id:uid()+uid(),
@@ -370,9 +363,6 @@ const newP=()=>({
   q:{step:0,next:0,st:'idle',on:false}
 });
 
-/* ═════════════════════════════════════════════════════════════════════
-   setP : restaure correctement Q depuis P.q
-   ═════════════════════════════════════════════════════════════════════ */
 function setP(p){
   P=p;
   P.sub=P.sub||{};
@@ -444,9 +434,6 @@ function promptFor(f){
   };
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   GÉNÉRATION D'IMAGE
-   ═════════════════════════════════════════════════════════════════════ */
 async function gen(id,opt){
   opt=opt||{};
   const f=find(id);
@@ -501,7 +488,6 @@ async function imgPass(list,label){
   }
   fdDone(it,list.filter(o=>o.img).length+'/'+list.length+' '+label+' prêt(e)s');
 }
-
 /* ═════════════════════════════════════════════════════════════════════
    AFFICHAGE (helpers)
    ═════════════════════════════════════════════════════════════════════ */
@@ -526,13 +512,15 @@ const shotCard=h=>'<div class="cd" id="c-'+h.id+'">'+imBox(h)+imgPanel(h)+fld(h,
 const mini=o=>'<div class="mn" id="m-'+o.id+'"><div class="im" style="aspect-ratio:'+(o.role!==undefined?'3/4':AR())+'">'+(o.img?'<img src="'+esc(ref(o.img))+'" alt="">':'<span>'+(o.err?'✕':'…')+'</span>')+(o.busy?'<i class="sp"></i>':'')+'</div><div class="lab">'+esc(o.name||o.title||o.size||'')+'</div></div>';
 const LBL={wait:'en attente',run:'en cours',ok:'prête',er:'échec'};
 const tile=(h,i)=>'<div class="tl '+h.vst+'" id="t-'+h.id+'"><div class="th" style="aspect-ratio:'+AR()+'">'+(h.video?'<video src="'+esc(h.video)+'" controls playsinline preload="metadata" data-id="'+h.id+'"></video>':h.img?'<img src="'+esc(ref(h.img))+'" alt="">':'')+'<b class="tg">'+i+'</b>'+(h.video&&!h.seen?'<em class="nw">NOUVEAU</em>':'')+'</div><div class="tx">'+esc(h.line?(h.who?h.who+' : ':'')+h.line:h.action||'')+'</div><div class="mt">'+(h.img?LBL[h.vst]||'':'image manquante')+(h.vst=='run'&&h.msg?' · '+esc(h.msg):'')+(h.err?' · '+esc(h.err):'')+'</div>'+(h.vst=='er'?'<div style="padding:0 8px 8px"><button class="sm" data-a="retry" data-id="'+h.id+'">Relancer</button></div>':'')+'</div>';
+
 function refresh(id){
   const f=find(id);
   if(!f)return;
   const set=(p,h)=>{const a=document.getElementById(p+id);if(a){const t=document.createElement('div');t.innerHTML=h;if(t.firstChild)a.replaceWith(t.firstChild)}};
   if(f.t=='c'){set('c-',charCard(f.o));set('i-',charIn(f.o))}
   else if(f.t=='s')set('c-',sceneCard(f.o,P.scenes.indexOf(f.o)));
-  else if(f.t=='h'){set('c-',shotCard(f.o));set('t-',tile(f.o,shots().findIndex(x=>x.h===f.o)+   if(TASK)set('m-',mini(f.o));
+  else if(f.t=='h'){set('c-',shotCard(f.o));set('t-',tile(f.o,shots().findIndex(x=>x.h===f.o)+1))}
+  if(TASK)set('m-',mini(f.o));
   syncNext();
   if(page==6)stats();
 }
@@ -714,7 +702,6 @@ function runShots(){
     await imgPass(shots().map(x=>x.h),'images de plans');
   },()=>done(5,'rev'));
 }
-
 /* ═════════════════════════════════════════════════════════════════════
    VUES
    ═════════════════════════════════════════════════════════════════════ */
@@ -738,9 +725,6 @@ V[2].in=()=>'<div class="hero">'+hd(3,'Votre <b>idée</b> de film')+guide('👉 
   '<textarea id="synraw" rows="8" data-f="synRaw" data-id="P" placeholder="Ex. Un vieux projectionniste découvre une bobine qui montre l\'avenir de son village…">'+esc(P.synRaw)+'</textarea>'+
   foot(btn('go','← Précédent','','data-n="1"'),'<span class="rw">'+btn('synasis','Garder mon texte tel quel')+nextBtn('synai','✦ Analyser avec l\'IA')+'</span>')+'</div>';
 
-/* ═════════════════════════════════════════════════════════════════════
-   ✅ V[2].pick CORRIGÉ — un seul bloc, plus de duplication
-   ═════════════════════════════════════════════════════════════════════ */
 V[2].pick=()=>'<div class="hero">'+hd(3,'Choisissez votre <b>synopsis</b>')+guide('👉 À vous : la version de base (en haut) est toujours retenue. Cochez les suggestions que vous voulez y intégrer, ou aucune, puis validez.')+
   '<div class="cd pk"><div class="lab">Votre synopsis, bien réécrit</div><p>'+esc(P.syn.base)+'</p></div>'+
   '<div class="grid" style="margin-top:12px">'+P.syn.sugg.map((s,i)=>'<label class="cd" style="cursor:pointer"><span class="lab">Suggestion '+(i+1)+'</span><p>'+esc(s)+'</p><input type="checkbox" data-sg="'+i+'" '+((P.syn.sel||[]).indexOf(i)>=0?'checked':'')+' style="width:auto"> Intégrer à ma version</label>').join('')+'</div>'+
@@ -810,7 +794,6 @@ function render(keep){
   save();
 }
 function keysChips(){const e=$('#kl');if(!e)return;e.innerHTML=KEYS.list.map((k,i)=>'<span class="chip '+(k.off?'off':'')+'">#'+(i+1)+' …'+esc(k.k.slice(-4))+'</span>').join('')}
-
 /* ═════════════════════════════════════════════════════════════════════
    FILE D'ATTENTE VIDÉO
    ═════════════════════════════════════════════════════════════════════ */
@@ -845,9 +828,7 @@ function stats(){
 const vp=(h,s)=>san(st()+'. '+h.action+'. Camera: '+h.camera+'. Setting: '+s.decor+'. '+(h.line?(h.who||'The character')+' says in French, lips in sync: "'+h.line+'".':'No speech.')+' Realistic ambient sound effects only, no music, no subtitles, no on-screen text. Keep the identity, outfit and visual style of the first frame identical throughout.');
 const dims=()=>P.ratio=='9:16'?[480,854]:P.ratio=='1:1'?[640,640]:[854,480];
 function sat(){Q.st='full';Q.next=Date.now()+BACK[Q.step]*60000;log('wr','file vidéo saturée → nouveau test dans '+BACK[Q.step]+' min');toast('File Agnès saturée — retest dans '+BACK[Q.step]+' min');Q.step=Math.min(Q.step+1,BACK.length-1);save();qui()}
-/* ═════════════════════════════════════════════════════════════════════
-   PATCH 3a : launch() capture P et vérifie après chaque await
-   ═════════════════════════════════════════════════════════════════════ */
+
 async function launch(h,s){
   const myP=P;
   const o=await slot('vid'),free=KEYS.plan=='free';
@@ -895,9 +876,6 @@ async function launch(h,s){
   poll(h);
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   PATCH 3b : poll() capture myP, vérifie avant chaque écriture
-   ═════════════════════════════════════════════════════════════════════ */
 async function poll(h){
   const t=h.task;
   const model=VID[KEYS.plan];
@@ -952,9 +930,6 @@ async function poll(h){
   }
 }
 
-/* ═════════════════════════════════════════════════════════════════════
-   Boucle d'orchestration de la file vidéo
-   ═════════════════════════════════════════════════════════════════════ */
 setInterval(function(){
   qui();
   if(!P||!Q.on||Q.busy||Date.now()<Q.next)return;
@@ -1187,6 +1162,7 @@ async function sessions(){
   $('#md').classList.add('on');
 }
 $('#md').addEventListener('click',e=>{if(e.target.id=='md')e.target.classList.remove('on')});
+
 /* ═════════════════════════════════════════════════════════════════════
    REPRISE + INIT
    ═════════════════════════════════════════════════════════════════════ */
